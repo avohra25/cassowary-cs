@@ -292,9 +292,18 @@ public sealed partial class Solver
     /// <summary>
     /// Phase one: adds the row with an artificial basic variable and minimises it.
     /// The constraint is satisfiable iff the artificial variable can be driven to zero.
+    /// <para>
+    /// Unlike Kiwi, a failed attempt rolls the tableau back to a snapshot. Simply
+    /// dropping the artificial column would silently pin it to zero and leave the
+    /// rejected constraint half-applied, so later solutions could violate
+    /// constraints that were accepted earlier.
+    /// </para>
     /// </summary>
     private bool AddWithArtificialVariable(Row row)
     {
+        var savedRows = _rows.Select(kv => (kv.Key, new Row(kv.Value))).ToList();
+        var savedObjective = new Row(_objective);
+
         var art = NewSymbol(SymbolKind.Slack);
         _rows[art] = new Row(row);
         _artificial = new Row(row);
@@ -302,22 +311,39 @@ public sealed partial class Solver
         Optimize(_artificial);
         bool success = Row.NearZero(_artificial.Constant);
         _artificial = null;
+        if (!success)
+        {
+            Restore(savedRows, savedObjective);
+            return false;
+        }
 
         // If the artificial variable is still basic, pivot it out (or drop an empty row).
         if (_rows.Remove(art, out var artRow))
         {
-            if (artRow.Cells.Count == 0) return success;
+            if (artRow.Cells.Count == 0) return true;
             var entering = AnyPivotableSymbol(artRow);
-            if (!entering.IsValid) return false;
+            if (!entering.IsValid)
+            {
+                Restore(savedRows, savedObjective);
+                return false;
+            }
             artRow.SolveFor(art, entering);
             Substitute(entering, artRow);
             _rows[entering] = artRow;
         }
 
-        // The artificial variable is now parametric; remove its column everywhere.
+        // The artificial variable is now parametric at zero; remove its column everywhere.
         foreach (var r in _rows.Values) r.Remove(art);
         _objective.Remove(art);
-        return success;
+        return true;
+    }
+
+    private void Restore(List<(Symbol, Row)> rows, Row objective)
+    {
+        _rows.Clear();
+        foreach (var (symbol, row) in rows) _rows[symbol] = row;
+        _objective = objective;
+        _infeasibleRows.Clear();
     }
 
     private static Symbol AnyPivotableSymbol(Row row)

@@ -74,7 +74,7 @@ public class SolverTests
     }
 
     [Fact]
-    public void UnsatisfiableRequiredConstraintThrows()
+    public void UnsatisfiableRequiredConstraintThrowsAndLeavesSolverUsable()
     {
         var x = new Variable("x");
         var s = new Solver();
@@ -83,6 +83,10 @@ public class SolverTests
         var ex = Assert.Throws<UnsatisfiableConstraintException>(() => s.AddConstraint(bad));
         Assert.Same(bad, ex.Constraint);
         Assert.False(s.HasConstraint(bad));
+
+        s.AddConstraint(x.Eq(12) | Strength.Strong);
+        s.UpdateVariables();
+        Assert.Equal(12, x.Value, Tol);
     }
 
     [Fact]

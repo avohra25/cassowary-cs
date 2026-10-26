@@ -4,7 +4,8 @@ An incremental **Cassowary** linear-constraint solver for .NET 8 — the
 algorithm behind Apple's Auto Layout — written from scratch in C# with no
 runtime dependencies.
 
-> Work in progress: core simplex, edit variables and a constraint DSL.
+> Work in progress: core simplex, edit variables, a constraint DSL and
+> randomized property tests.
 
 ```csharp
 using Cassowary;
@@ -39,6 +40,12 @@ foreach (var c in ConstraintParser.ParseAll("""
     """, scope))
     solver.AddConstraint(c);
 ```
+
+## Testing
+
+Besides unit tests, `RandomizedTests` builds random constraint systems and
+checks every required constraint holds, that solutions match a from-scratch
+solve, and that rejected constraints leave the solver untouched.
 
 ## Building and testing
 
