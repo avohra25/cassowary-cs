@@ -4,7 +4,7 @@ An incremental **Cassowary** linear-constraint solver for .NET 8 — the
 algorithm behind Apple's Auto Layout — written from scratch in C# with no
 runtime dependencies.
 
-> Work in progress: core simplex plus edit variables and `SuggestValue`.
+> Work in progress: core simplex, edit variables and a constraint DSL.
 
 ```csharp
 using Cassowary;
@@ -25,6 +25,19 @@ Interactive values (window size, a dragged handle) are edit variables:
 solver.AddEditVariable(width, Strength.Strong);
 solver.SuggestValue(width, 640);   // re-optimised with the dual simplex
 solver.UpdateVariables();
+```
+
+## Constraint DSL
+
+```csharp
+var scope = new VariableScope();
+foreach (var c in ConstraintParser.ParseAll("""
+    left >= 0
+    left + width <= 800
+    width == 2 * gutter + 300 @ strong
+    0 <= gutter <= 40 @ medium * 2
+    """, scope))
+    solver.AddConstraint(c);
 ```
 
 ## Building and testing
