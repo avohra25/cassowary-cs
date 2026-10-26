@@ -1,0 +1,26 @@
+# A centred dialog with a title, body and two right-aligned buttons.
+
+dialog.centerX == window.centerX
+dialog.centerY == window.centerY
+dialog.width == 0.6 * window.width        @ strong
+dialog.width <= 520
+dialog.height == 260                      @ strong
+dialog.height <= window.height - 40       @ strong
+
+title.left == dialog.left + 16
+title.right == dialog.right - 16
+title.top == dialog.top + 16
+title.height == 30
+
+ok.right == dialog.right - 16
+ok.bottom == dialog.bottom - 16
+ok.width == 90; ok.height == 32
+cancel.right == ok.left - 8
+cancel.top == ok.top
+cancel.width == ok.width; cancel.height == ok.height
+
+body.left == title.left
+body.right == title.right
+body.top == title.bottom + 12
+body.bottom == ok.top - 12
+body.height >= 20                         @ weak

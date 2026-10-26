@@ -1,0 +1,28 @@
+# Classic "holy grail" page: header, three columns, footer.
+# Every name is box.attribute; `window` is sized from the command line.
+
+header.left == window.left + 10
+header.right == window.right - 10
+header.top == window.top + 10
+header.height == 60
+
+footer.left == header.left
+footer.right == header.right
+footer.bottom == window.bottom - 10
+footer.height == 40
+
+nav.left == header.left
+nav.top == header.bottom + 10
+nav.bottom == footer.top - 10
+nav.width >= 120
+nav.width == 0.2 * window.width           @ medium
+
+aside.right == header.right
+aside.top == nav.top; aside.bottom == nav.bottom
+aside.width == nav.width                  @ strong
+aside.width <= 200
+
+main.left == nav.right + 10
+main.right == aside.left - 10
+main.top == nav.top; main.bottom == nav.bottom
+main.width >= 200                         @ strong
