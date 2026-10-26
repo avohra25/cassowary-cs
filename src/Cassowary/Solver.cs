@@ -133,14 +133,18 @@ public sealed partial class Solver
         _rows.Clear();
         _vars.Clear();
         _infeasibleRows.Clear();
+        ResetEdits();
         _objective = new Row();
         _artificial = null;
         _nextSymbolId = 1;
     }
 
     /// <summary>
-    /// The weighted violation of all non-required constraints at the current
-    /// solution: Σ strength × error. This is what the solver minimises.
+    /// The weighted violation of all non-required constraints (including edit
+    /// constraints) at the current solution: Σ strength × error. This is what
+    /// the solver minimises. It is computed from the error symbols directly
+    /// because the objective row's constant is not maintained by
+    /// <see cref="SuggestValue"/>.
     /// </summary>
     public double ObjectiveValue
     {
